@@ -1,189 +1,804 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aurora Beats</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aurora Beats – DJ & Radio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=Syne+Mono&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --black:   #090909;
+      --dark:    #111111;
+      --panel:   #181818;
+      --border:  #2a2a2a;
+      --yellow:  #f5d20a;
+      --yellow2: #fce94a;
+      --white:   #f0f0f0;
+      --gray:    #888;
+      --red:     #ff3232;
+    }
 
-<style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #000;
-  color: #fff;
-}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* HEADER */
-header {
-  text-align: center;
-  padding: 80px 20px;
-  background: linear-gradient(180deg, #111, #000);
-}
+    html { scroll-behavior: smooth; }
 
-h1 {
-  color: #FFD700;
-  font-size: 60px;
-  margin: 0;
-  letter-spacing: 2px;
-}
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+    }
 
-.status {
-  margin-top: 15px;
-  font-size: 18px;
-}
+    /* ─── NOISE OVERLAY ─────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: .035;
+      pointer-events: none;
+      z-index: 9999;
+    }
 
-.live {
-  color: red;
-  font-weight: bold;
-}
+    /* ─── NAV ────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem;
+      height: 64px;
+      background: rgba(9,9,9,.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
 
-.offline {
-  color: gray;
-}
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.55rem;
+      letter-spacing: .12em;
+      color: var(--yellow);
+      text-decoration: none;
+    }
 
-/* BUTTON */
-button {
-  margin-top: 20px;
-  padding: 12px 25px;
-  font-size: 16px;
-  border: none;
-  background: #FFD700;
-  color: #000;
-  cursor: pointer;
-  transition: 0.3s;
-}
+    .nav-links {
+      display: flex; gap: 2rem; list-style: none;
+    }
 
-button:hover {
-  background: white;
-}
+    .nav-links a {
+      color: var(--gray);
+      text-decoration: none;
+      font-size: .8rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--white); }
 
-/* SECTIONS */
-section {
-  padding: 50px 20px;
-  text-align: center;
-}
+    /* ─── LIVE BADGE ─────────────────────────────────────── */
+    .live-badge {
+      display: flex; align-items: center; gap: .5rem;
+      font-family: 'Syne Mono', monospace;
+      font-size: .75rem;
+      letter-spacing: .08em;
+      cursor: pointer;
+      user-select: none;
+      padding: .35rem .75rem;
+      border-radius: 2rem;
+      border: 1px solid var(--border);
+      transition: all .25s;
+    }
 
-h2 {
-  color: #FFD700;
-  margin-bottom: 20px;
-}
+    .live-badge.live {
+      border-color: var(--red);
+      background: rgba(255,50,50,.08);
+      color: var(--red);
+    }
 
-/* TABLE */
-table {
-  margin: auto;
-  width: 90%;
-  max-width: 700px;
-  border-collapse: collapse;
-}
+    .live-badge.offline {
+      color: var(--gray);
+    }
 
-th, td {
-  border: 1px solid #333;
-  padding: 12px;
-}
+    .live-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--gray);
+      flex-shrink: 0;
+    }
 
-th {
-  background: #111;
-  color: #FFD700;
-}
+    .live-badge.live .live-dot {
+      background: var(--red);
+      box-shadow: 0 0 0 0 rgba(255,50,50,.6);
+      animation: pulse 1.4s infinite;
+    }
 
-/* STREAM BOX */
-.stream-box {
-  margin: auto;
-  margin-top: 20px;
-  padding: 20px;
-  border: 1px solid #222;
-  max-width: 700px;
-  background: #0a0a0a;
-}
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(255,50,50,.6); }
+      70%  { box-shadow: 0 0 0 8px rgba(255,50,50,0); }
+      100% { box-shadow: 0 0 0 0 rgba(255,50,50,0); }
+    }
 
-/* FOOTER */
-footer {
-  text-align: center;
-  padding: 30px;
-  font-size: 14px;
-  color: #777;
-}
-</style>
+    /* ─── HERO ───────────────────────────────────────────── */
+    #hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: flex-start;
+      padding: 8rem 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* grid lines bg */
+    #hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(245,210,10,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,210,10,.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+    }
+
+    /* glow blob */
+    #hero::after {
+      content: '';
+      position: absolute;
+      width: 640px; height: 640px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245,210,10,.13) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -58%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-family: 'Syne Mono', monospace;
+      font-size: .7rem;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--yellow);
+      margin-bottom: 1.2rem;
+      opacity: 0;
+      animation: fadeUp .7s .1s forwards;
+    }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(5rem, 16vw, 14rem);
+      line-height: .92;
+      letter-spacing: -.01em;
+      color: var(--white);
+      position: relative;
+      z-index: 1;
+      opacity: 0;
+      animation: fadeUp .7s .2s forwards;
+    }
+
+    .hero-title span { color: var(--yellow); }
+
+    .hero-sub {
+      max-width: 520px;
+      margin-top: 2rem;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--gray);
+      opacity: 0;
+      animation: fadeUp .7s .35s forwards;
+    }
+
+    .hero-cta {
+      margin-top: 2.5rem;
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp .7s .5s forwards;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: .75rem 1.8rem;
+      font-size: .82rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 3px;
+      cursor: pointer;
+      border: none;
+      transition: all .22s;
+    }
+
+    .btn-yellow {
+      background: var(--yellow);
+      color: var(--black);
+    }
+    .btn-yellow:hover { background: var(--yellow2); transform: translateY(-2px); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--white);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--white); transform: translateY(-2px); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── SECTION WRAPPER ────────────────────────────────── */
+    section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
+
+    .section-label {
+      font-family: 'Syne Mono', monospace;
+      font-size: .65rem;
+      letter-spacing: .3em;
+      text-transform: uppercase;
+      color: var(--yellow);
+      margin-bottom: 1.2rem;
+    }
+
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      letter-spacing: .04em;
+      line-height: 1;
+      margin-bottom: 2.5rem;
+    }
+
+    hr.divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ─── STREAM SECTION ─────────────────────────────────── */
+    .stream-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .stream-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2rem;
+      display: flex; flex-direction: column; gap: .8rem;
+      transition: border-color .2s, transform .2s;
+    }
+    .stream-card:hover { border-color: var(--yellow); transform: translateY(-3px); }
+
+    .stream-icon {
+      font-size: 2rem;
+    }
+
+    .stream-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: .08em;
+      color: var(--yellow);
+    }
+
+    .stream-desc {
+      font-size: .85rem;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+
+    .stream-badge {
+      display: inline-block;
+      padding: .2rem .65rem;
+      font-family: 'Syne Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .1em;
+      border-radius: 2rem;
+    }
+    .badge-soon { border: 1px solid var(--border); color: var(--gray); }
+    .badge-active { border: 1px solid var(--yellow); color: var(--yellow); background: rgba(245,210,10,.07); }
+
+    /* ─── PLAYER PLACEHOLDER ─────────────────────────────── */
+    .player-bar {
+      margin-top: 2rem;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.5rem 2rem;
+      display: flex; align-items: center; gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .player-icon {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: var(--yellow);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      color: var(--black);
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: transform .2s;
+    }
+    .player-icon:hover { transform: scale(1.1); }
+
+    .player-info { flex: 1; min-width: 160px; }
+    .player-track {
+      font-size: .9rem; font-weight: 500;
+      color: var(--white);
+    }
+    .player-sub {
+      font-size: .75rem; color: var(--gray);
+      margin-top: .2rem;
+      font-family: 'Syne Mono', monospace;
+    }
+
+    .player-waveform {
+      flex: 2; min-width: 160px; height: 36px;
+      display: flex; align-items: center; gap: 2px;
+    }
+
+    .wave-bar {
+      flex: 1; background: var(--border);
+      border-radius: 2px;
+      animation: wave 1.2s ease-in-out infinite;
+    }
+
+    .wave-bar:nth-child(odd)  { height: 40%; animation-delay: .15s; }
+    .wave-bar:nth-child(3n)   { height: 70%; animation-delay: .3s; }
+    .wave-bar:nth-child(5n)   { height: 90%; }
+    .wave-bar:nth-child(7n)   { height: 55%; animation-delay: .45s; }
+
+    .player-bar.playing .wave-bar { background: var(--yellow); }
+
+    @keyframes wave {
+      0%,100% { transform: scaleY(1); }
+      50%      { transform: scaleY(.4); }
+    }
+
+    /* ─── SCHEDULE ───────────────────────────────────────── */
+    .schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .9rem;
+    }
+
+    .schedule-table thead tr {
+      border-bottom: 1px solid var(--yellow);
+    }
+
+    .schedule-table th {
+      font-family: 'Syne Mono', monospace;
+      font-size: .65rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--yellow);
+      padding: .75rem 1rem;
+      text-align: left;
+    }
+
+    .schedule-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    .schedule-table tbody tr:hover { background: var(--panel); }
+
+    .schedule-table td {
+      padding: 1rem 1rem;
+      color: var(--white);
+    }
+
+    .td-time {
+      font-family: 'Syne Mono', monospace;
+      font-size: .8rem;
+      color: var(--yellow);
+      white-space: nowrap;
+    }
+
+    .td-show { font-weight: 500; }
+
+    .td-genre {
+      font-size: .78rem;
+      color: var(--gray);
+    }
+
+    .show-tag {
+      display: inline-block;
+      padding: .18rem .6rem;
+      border: 1px solid var(--border);
+      border-radius: 2rem;
+      font-size: .68rem;
+      color: var(--gray);
+      font-family: 'Syne Mono', monospace;
+    }
+
+    /* ─── ABOUT ──────────────────────────────────────────── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    @media (max-width: 680px) {
+      .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+    }
+
+    .about-visual {
+      aspect-ratio: 1;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 6rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-visual::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 60%, rgba(245,210,10,.15) 0%, transparent 65%);
+    }
+
+    .about-text p {
+      line-height: 1.8;
+      color: var(--gray);
+      margin-bottom: 1.2rem;
+    }
+
+    .about-text p strong { color: var(--white); font-weight: 500; }
+
+    .about-tags {
+      display: flex; flex-wrap: wrap; gap: .5rem;
+      margin-top: 1.5rem;
+    }
+
+    .tag {
+      padding: .3rem .9rem;
+      border: 1px solid var(--yellow);
+      color: var(--yellow);
+      border-radius: 2rem;
+      font-size: .75rem;
+      font-family: 'Syne Mono', monospace;
+      letter-spacing: .08em;
+    }
+
+    /* ─── CONTACT ────────────────────────────────────────── */
+    .contact-box {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3rem 2.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 2rem;
+    }
+
+    .contact-box h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: .06em;
+    }
+
+    .contact-box p {
+      color: var(--gray); font-size: .9rem; margin-top: .4rem;
+    }
+
+    .contact-box a {
+      color: var(--yellow); text-decoration: none;
+    }
+    .contact-box a:hover { text-decoration: underline; }
+
+    /* ─── FOOTER ─────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    footer .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem;
+      letter-spacing: .1em;
+      color: var(--yellow);
+    }
+
+    footer p {
+      font-size: .75rem; color: var(--gray);
+      font-family: 'Syne Mono', monospace;
+    }
+
+    /* ─── MOBILE NAV ─────────────────────────────────────── */
+    .hamburger { display: none; background: none; border: none; cursor: pointer; }
+    .hamburger span {
+      display: block; width: 22px; height: 2px;
+      background: var(--white); margin: 5px 0;
+      transition: all .25s;
+    }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .hamburger { display: block; }
+    }
+
+    /* ─── SCROLL FADE ────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity .7s, transform .7s;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+  </style>
 </head>
-
 <body>
 
-<header>
-  <h1>AURORA BEATS</h1>
+  <!-- ══════════════ NAV ══════════════ -->
+  <nav>
+    <a href="#" class="nav-logo">Aurora Beats</a>
+    <ul class="nav-links">
+      <li><a href="#stream">Stream</a></li>
+      <li><a href="#schedule">Sendezeiten</a></li>
+      <li><a href="#about">Über Mich</a></li>
+      <li><a href="#contact">Kontakt</a></li>
+    </ul>
+    <div id="liveBadge" class="live-badge offline" onclick="toggleLive()" title="Live-Status umschalten">
+      <span class="live-dot"></span>
+      <span id="liveText">OFFLINE</span>
+    </div>
+    <button class="hamburger" onclick="toggleNav()" aria-label="Menü">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
 
-  <div id="status" class="status offline">
-    ● OFFLINE
+  <!-- ══════════════ HERO ══════════════ -->
+  <div id="hero">
+    <p class="hero-eyebrow">// DJ &amp; Online Radio</p>
+    <h1 class="hero-title">AURORA<br><span>BEATS</span></h1>
+    <p class="hero-sub">
+      Elektronische Musik, die bewegt. Von Deep House bis Techno —
+      jede Nacht ein neues Set, jede Sendung eine Reise.
+      Live auf <strong style="color:var(--white)">aurorabeats.site</strong>.
+    </p>
+    <div class="hero-cta">
+      <a href="#stream" class="btn btn-yellow">▶ Jetzt Hören</a>
+      <a href="#schedule" class="btn btn-outline">Sendezeiten</a>
+    </div>
   </div>
 
-  <button onclick="toggleLive()">Live Status testen</button>
-</header>
+  <hr class="divider" />
 
-<section>
-  <h2>🎧 Live Stream</h2>
+  <!-- ══════════════ STREAM ══════════════ -->
+  <section id="stream">
+    <p class="section-label reveal">// 02 — Stream</p>
+    <h2 class="section-title reveal">LIVE &amp; RADIO</h2>
 
-  <div class="stream-box">
-    <p>Hier kommt später dein Stream rein (BigTime.fm / Twitch / Radio)</p>
-  </div>
-</section>
+    <!-- Player Bar -->
+    <div class="player-bar reveal" id="playerBar">
+      <div class="player-icon" onclick="togglePlayer()" id="playBtn">▶</div>
+      <div class="player-info">
+        <div class="player-track" id="trackName">Aurora Beats – Live Mix</div>
+        <div class="player-sub" id="trackSub">WARTE AUF STREAM...</div>
+      </div>
+      <div class="player-waveform">
+        <div class="wave-bar"></div><div class="wave-bar"></div>
+        <div class="wave-bar"></div><div class="wave-bar"></div>
+        <div class="wave-bar"></div><div class="wave-bar"></div>
+        <div class="wave-bar"></div><div class="wave-bar"></div>
+        <div class="wave-bar"></div><div class="wave-bar"></div>
+        <div class="wave-bar"></div><div class="wave-bar"></div>
+        <div class="wave-bar"></div><div class="wave-bar"></div>
+        <div class="wave-bar"></div><div class="wave-bar"></div>
+        <div class="wave-bar"></div><div class="wave-bar"></div>
+        <div class="wave-bar"></div><div class="wave-bar"></div>
+      </div>
+    </div>
 
-<section>
-  <h2>📅 Sendezeiten</h2>
+    <!-- Stream Karten -->
+    <div class="stream-grid" style="margin-top:2rem;">
+      <div class="stream-card reveal">
+        <div class="stream-icon">📻</div>
+        <div class="stream-name">Webradio Stream</div>
+        <p class="stream-desc">AzuraCast oder BigTime.fm Integration — dein eigener 24/7 Radio-Stream direkt hier eingebettet.</p>
+        <span class="stream-badge badge-soon">DEMNÄCHST</span>
+      </div>
+      <div class="stream-card reveal">
+        <div class="stream-icon">📺</div>
+        <div class="stream-name">Twitch Live</div>
+        <p class="stream-desc">Live DJ Sets und Events direkt von Twitch — Video-Stream mit Chat integration.</p>
+        <span class="stream-badge badge-soon">DEMNÄCHST</span>
+      </div>
+      <div class="stream-card reveal">
+        <div class="stream-icon">▶</div>
+        <div class="stream-name">YouTube Live</div>
+        <p class="stream-desc">Aufzeichnungen, Mixes und Live-Events auf YouTube. Subscribe für alle zukünftigen Sets.</p>
+        <span class="stream-badge badge-active">AKTIV</span>
+      </div>
+    </div>
 
-  <table>
-    <tr>
-      <th>Tag</th>
-      <th>Zeit</th>
-      <th>Show</th>
-    </tr>
-    <tr>
-      <td>Freitag</td>
-      <td>20:00 - 22:00</td>
-      <td>Prime DJ Set</td>
-    </tr>
-    <tr>
-      <td>Samstag</td>
-      <td>18:00 - 20:00</td>
-      <td>Weekend Vibes</td>
-    </tr>
-    <tr>
-      <td>Sonntag</td>
-      <td>19:00 - 21:00</td>
-      <td>Chill Session</td>
-    </tr>
-  </table>
-</section>
+    <!-- Iframe Placeholder -->
+    <div style="margin-top:2rem; background:var(--panel); border:1px dashed var(--border); border-radius:6px; padding:3rem 2rem; text-align:center;" class="reveal">
+      <p style="font-family:'Syne Mono',monospace; font-size:.75rem; color:var(--gray); letter-spacing:.15em;">// STREAM PLAYER WIRD HIER EINGEBETTET</p>
+      <p style="font-size:.82rem; color:var(--gray); margin-top:.5rem;">BigTime.fm · AzuraCast · Twitch · YouTube iFrame</p>
+    </div>
+  </section>
 
-<section>
-  <h2>📡 Über mich</h2>
+  <hr class="divider" />
 
-  <p>
-    DJ / Radio Host / Live Sets.<br>
-    Energie, Musik und Community Vibes.<br><br>
-    Kontakt: direktanfragepaul@gmail.com
-  </p>
-</section>
+  <!-- ══════════════ SCHEDULE ══════════════ -->
+  <section id="schedule">
+    <p class="section-label reveal">// 03 — Sendezeiten</p>
+    <h2 class="section-title reveal">PROGRAMM</h2>
 
-<footer>
-  © 2026 Aurora Beats – All Rights Reserved
-</footer>
+    <table class="schedule-table reveal">
+      <thead>
+        <tr>
+          <th>Tag</th>
+          <th>Uhrzeit</th>
+          <th>Show</th>
+          <th>Genre</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Freitag</td>
+          <td class="td-time">20:00 – 22:00</td>
+          <td class="td-show">DJ Set <span class="show-tag">LIVE</span></td>
+          <td class="td-genre">House · Techno</td>
+        </tr>
+        <tr>
+          <td>Samstag</td>
+          <td class="td-time">18:00 – 20:00</td>
+          <td class="td-show">Weekend Vibes <span class="show-tag">LIVE</span></td>
+          <td class="td-genre">Deep House · Melodic</td>
+        </tr>
+        <tr>
+          <td>Sonntag</td>
+          <td class="td-time">16:00 – 18:00</td>
+          <td class="td-show">Sunday Session</td>
+          <td class="td-genre">Chill · Ambient</td>
+        </tr>
+        <tr>
+          <td>Mittwoch</td>
+          <td class="td-time">21:00 – 23:00</td>
+          <td class="td-show">Midweek Mix</td>
+          <td class="td-genre">Techno · Industrial</td>
+        </tr>
+      </tbody>
+    </table>
 
-<script>
-let isLive = false;
+    <p style="margin-top:1.5rem; font-size:.78rem; color:var(--gray); font-family:'Syne Mono',monospace;" class="reveal">
+      * Alle Zeiten in MEZ (Central European Time). Änderungen via Social Media.
+    </p>
+  </section>
 
-function toggleLive() {
-  isLive = !isLive;
+  <hr class="divider" />
 
-  const status = document.getElementById("status");
+  <!-- ══════════════ ABOUT ══════════════ -->
+  <section id="about">
+    <p class="section-label reveal">// 04 — Über Mich</p>
+    <h2 class="section-title reveal">AURORA BEATS</h2>
 
-  if (isLive) {
-    status.innerHTML = "🔴 LIVE ON AIR";
-    status.className = "status live";
-  } else {
-    status.innerHTML = "● OFFLINE";
-    status.className = "status offline";
-  }
-}
-</script>
+    <div class="about-grid">
+      <div class="about-visual reveal">🎧</div>
+      <div class="about-text reveal">
+        <p>
+          <strong>Aurora Beats</strong> ist mehr als ein DJ-Name — es ist eine Klangwelt.
+          Zwischen tiefen Bässen, hypnotischen Melodien und pulsierenden Rhythmen
+          erschafft jedes Set eine eigene Atmosphäre.
+        </p>
+        <p>
+          Seit Jahren im elektronischen Untergrund zuhause, steht
+          <strong>Aurora Beats</strong> für Sets die Geschichten erzählen —
+          von sanftem Deep House bis zum treibenden Techno.
+        </p>
+        <p>
+          Booking, Kollaborationen oder einfach nur Feedback?<br />
+          Schreib direkt:
+          <a href="mailto:direktanfragepaul@gmail.com" style="color:var(--yellow); text-decoration:none;">
+            direktanfragepaul@gmail.com
+          </a>
+        </p>
+        <div class="about-tags">
+          <span class="tag">Deep House</span>
+          <span class="tag">Techno</span>
+          <span class="tag">Melodic</span>
+          <span class="tag">Ambient</span>
+          <span class="tag">DJ</span>
+          <span class="tag">Radio</span>
+        </div>
+      </div>
+    </div>
+  </section>
 
+  <hr class="divider" />
+
+  <!-- ══════════════ CONTACT ══════════════ -->
+  <section id="contact">
+    <div class="contact-box reveal">
+      <div>
+        <h3>BOOKING &amp; KONTAKT</h3>
+        <p>Für Anfragen, Events und Kollaborationen:</p>
+        <p style="margin-top:.5rem; font-size:1rem;">
+          <a href="mailto:direktanfragepaul@gmail.com">direktanfragepaul@gmail.com</a>
+        </p>
+      </div>
+      <a href="mailto:direktanfragepaul@gmail.com" class="btn btn-yellow">
+        Jetzt schreiben →
+      </a>
+    </div>
+  </section>
+
+  <!-- ══════════════ FOOTER ══════════════ -->
+  <footer>
+    <span class="footer-logo">Aurora Beats</span>
+    <p>© 2025 Aurora Beats · aurorabeats.site</p>
+    <p>Hosted on GitHub Pages</p>
+  </footer>
+
+  <!-- ══════════════ JS ══════════════ -->
+  <script>
+    // ─── Live Toggle ───────────────────────────────
+    let isLive = false;
+
+    function toggleLive() {
+      isLive = !isLive;
+      const badge = document.getElementById('liveBadge');
+      const text  = document.getElementById('liveText');
+      const sub   = document.getElementById('trackSub');
+
+      if (isLive) {
+        badge.className = 'live-badge live';
+        text.textContent = 'LIVE ON AIR';
+        sub.textContent  = '● LIVE – Aurora Beats Radio';
+      } else {
+        badge.className = 'live-badge offline';
+        text.textContent = 'OFFLINE';
+        sub.textContent  = 'WARTE AUF STREAM...';
+      }
+    }
+
+    // ─── Player Toggle ─────────────────────────────
+    let playing = false;
+
+    function togglePlayer() {
+      playing = !playing;
+      const bar = document.getElementById('playerBar');
+      const btn = document.getElementById('playBtn');
+      const sub = document.getElementById('trackSub');
+
+      if (playing) {
+        bar.classList.add('playing');
+        btn.textContent = '⏸';
+        sub.textContent = '● SPIELT GERADE';
+      } else {
+        bar.classList.remove('playing');
+        btn.textContent = '▶';
+        sub.textContent = isLive ? '● LIVE – Aurora Beats Radio' : 'WARTE AUF STREAM...';
+      }
+    }
+
+    // ─── Scroll Reveal ─────────────────────────────
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+      { threshold: 0.1 }
+    );
+    reveals.forEach(el => observer.observe(el));
+
+    // ─── Hamburger ─────────────────────────────────
+    function toggleNav() {
+      const links = document.querySelector('.nav-links');
+      links.style.display = links.style.display === 'flex' ? 'none' : 'flex';
+      links.style.flexDirection = 'column';
+      links.style.position = 'fixed';
+      links.style.top = '64px';
+      links.style.left = '0'; links.style.right = '0';
+      links.style.background = 'var(--dark)';
+      links.style.padding = '1.5rem 2rem';
+      links.style.borderBottom = '1px solid var(--border)';
+    }
+  </script>
 </body>
 </html>
