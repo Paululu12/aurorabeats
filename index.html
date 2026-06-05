@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora Beats</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #000;
+  color: #fff;
+}
+
+/* HEADER */
+header {
+  text-align: center;
+  padding: 80px 20px;
+  background: linear-gradient(180deg, #111, #000);
+}
+
+h1 {
+  color: #FFD700;
+  font-size: 60px;
+  margin: 0;
+  letter-spacing: 2px;
+}
+
+.status {
+  margin-top: 15px;
+  font-size: 18px;
+}
+
+.live {
+  color: red;
+  font-weight: bold;
+}
+
+.offline {
+  color: gray;
+}
+
+/* BUTTON */
+button {
+  margin-top: 20px;
+  padding: 12px 25px;
+  font-size: 16px;
+  border: none;
+  background: #FFD700;
+  color: #000;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: white;
+}
+
+/* SECTIONS */
+section {
+  padding: 50px 20px;
+  text-align: center;
+}
+
+h2 {
+  color: #FFD700;
+  margin-bottom: 20px;
+}
+
+/* TABLE */
+table {
+  margin: auto;
+  width: 90%;
+  max-width: 700px;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #333;
+  padding: 12px;
+}
+
+th {
+  background: #111;
+  color: #FFD700;
+}
+
+/* STREAM BOX */
+.stream-box {
+  margin: auto;
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #222;
+  max-width: 700px;
+  background: #0a0a0a;
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 30px;
+  font-size: 14px;
+  color: #777;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>AURORA BEATS</h1>
+
+  <div id="status" class="status offline">
+    ● OFFLINE
+  </div>
+
+  <button onclick="toggleLive()">Live Status testen</button>
+</header>
+
+<section>
+  <h2>🎧 Live Stream</h2>
+
+  <div class="stream-box">
+    <p>Hier kommt später dein Stream rein (BigTime.fm / Twitch / Radio)</p>
+  </div>
+</section>
+
+<section>
+  <h2>📅 Sendezeiten</h2>
+
+  <table>
+    <tr>
+      <th>Tag</th>
+      <th>Zeit</th>
+      <th>Show</th>
+    </tr>
+    <tr>
+      <td>Freitag</td>
+      <td>20:00 - 22:00</td>
+      <td>Prime DJ Set</td>
+    </tr>
+    <tr>
+      <td>Samstag</td>
+      <td>18:00 - 20:00</td>
+      <td>Weekend Vibes</td>
+    </tr>
+    <tr>
+      <td>Sonntag</td>
+      <td>19:00 - 21:00</td>
+      <td>Chill Session</td>
+    </tr>
+  </table>
+</section>
+
+<section>
+  <h2>📡 Über mich</h2>
+
+  <p>
+    DJ / Radio Host / Live Sets.<br>
+    Energie, Musik und Community Vibes.<br><br>
+    Kontakt: direktanfragepaul@gmail.com
+  </p>
+</section>
+
+<footer>
+  © 2026 Aurora Beats – All Rights Reserved
+</footer>
+
+<script>
+let isLive = false;
+
+function toggleLive() {
+  isLive = !isLive;
+
+  const status = document.getElementById("status");
+
+  if (isLive) {
+    status.innerHTML = "🔴 LIVE ON AIR";
+    status.className = "status live";
+  } else {
+    status.innerHTML = "● OFFLINE";
+    status.className = "status offline";
+  }
+}
+</script>
+
+</body>
+</html>
